@@ -20,6 +20,7 @@ spec:
       containers:
       - name: jenkins
         image: custom-jenkins:latest
+        pullPolicy: IfNotPresent
         resources:
           limits:
             memory: "2Gi"
