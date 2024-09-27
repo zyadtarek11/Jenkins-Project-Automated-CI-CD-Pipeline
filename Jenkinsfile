@@ -1,6 +1,7 @@
 pipeline {
     agent {
         kubernetes {
+            label 'kubectl'
             yaml """
             apiVersion: v1
             kind: Pod
@@ -16,12 +17,30 @@ pipeline {
                 tty: true
             """
         }
-    } 
+    }
     stages {
         stage('Checkout') {
             steps {
                 // Checkout the repository
                 git branch: 'main', url: 'https://github.com/zyadtarek11/kuberentes_three_tier.git'
+            }
+        }
+        stage('Create Namespace') {
+            steps {
+                script {
+                    // Create the 'webapp' namespace if it doesn't exist
+                    sh '''
+                    kubectl get namespace webapp || kubectl create namespace webapp
+                    '''
+                }
+            }
+        }
+        stage('Set Namespace') {
+            steps {
+                script {
+                    // Change context to the 'webapp' namespace
+                    sh 'kubectl config set-context --current --namespace=webapp'
+                }
             }
         }
         stage('Deploy Database') {
