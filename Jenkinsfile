@@ -1,20 +1,40 @@
 pipeline {
-    agent {
+agent {
         kubernetes {
-            cloud 'webapp'  // Specify the cloud you created
+            label 'my-agent'
+            defaultContainer 'jnlp'
             yaml """
             apiVersion: v1
             kind: Pod
             metadata:
-              labels:
-                some-label: my-label
+              name: jenkins-agent
             spec:
+              serviceAccountName: jenkins-admin
               containers:
-              - name: kubectl
-                image: bitnami/kubectl:latest
+              - name: jnlp
+                image: jenkins/inbound-agent
+              - name: docker
+                image: docker:20.10.7
                 command:
                 - cat
                 tty: true
+                volumeMounts:
+                - name: docker-socket
+                  mountPath: /var/run/docker.sock
+              - name: kubectl
+                image: kumargaurav522/jnlp-kubectl-slave:latest
+                command:
+                - cat
+                tty: true
+              - name: git
+                image: bitnami/git:latest
+                command:
+                - cat
+                tty: true
+              volumes:
+              - name: docker-socket
+                hostPath:
+                  path: /var/run/docker.sock
             """
         }
     }
