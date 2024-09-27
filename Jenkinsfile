@@ -1,56 +1,25 @@
 pipeline {
-agent {
+    agent {
         kubernetes {
+            // Specify the pod template to use
             label 'my-agent'
-            defaultContainer 'jnlp'
-            yaml """
-            apiVersion: v1
-            kind: Pod
-            metadata:
-              name: jenkins-agent
-            spec:
-              serviceAccountName: jenkins-admin
-              containers:
-              - name: jnlp
-                image: jenkins/inbound-agent
-              - name: docker
-                image: docker:20.10.7
-                command:
-                - cat
-                tty: true
-                volumeMounts:
-                - name: docker-socket
-                  mountPath: /var/run/docker.sock
-              - name: kubectl
-                image: kumargaurav522/jnlp-kubectl-slave:latest
-                command:
-                - cat
-                tty: true
-              - name: git
-                image: bitnami/git:latest
-                command:
-                - cat
-                tty: true
-              volumes:
-              - name: docker-socket
-                hostPath:
-                  path: /var/run/docker.sock
-            """
+            inheritFrom 'my-agent-template' // Use the pod template you configured
+            defaultContainer 'kubectl' // Specify the default container to use
         }
     }
     stages {
+        stage('Setup Namespace') {
+            steps {
+                script {
+                    // Create the webapp namespace if it doesn't exist
+                    sh 'kubectl create namespace webapp || echo "Namespace webapp already exists."'
+                }
+            }
+        }
         stage('Checkout') {
             steps {
                 // Checkout the repository
                 git branch: 'main', url: 'https://github.com/zyadtarek11/kuberentes_three_tier.git'
-            }
-        }
-        stage('Create Namespace') {
-            steps {
-                script {
-                    // Create the webapp namespace if it doesn't exist
-                    sh 'kubectl create namespace webapp || echo "Namespace webapp already exists"'
-                }
             }
         }
         stage('Deploy Database') {
