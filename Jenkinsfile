@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label 'kubectl'
+            cloud 'webapp'  // Specify the cloud you created
             yaml """
             apiVersion: v1
             kind: Pod
@@ -28,18 +28,8 @@ pipeline {
         stage('Create Namespace') {
             steps {
                 script {
-                    // Create the 'webapp' namespace if it doesn't exist
-                    sh '''
-                    kubectl get namespace webapp || kubectl create namespace webapp
-                    '''
-                }
-            }
-        }
-        stage('Set Namespace') {
-            steps {
-                script {
-                    // Change context to the 'webapp' namespace
-                    sh 'kubectl config set-context --current --namespace=webapp'
+                    // Create the webapp namespace if it doesn't exist
+                    sh 'kubectl create namespace webapp || echo "Namespace webapp already exists"'
                 }
             }
         }
@@ -48,11 +38,11 @@ pipeline {
                 script {
                     // Apply the database PVC and secret
                     sh '''
-                    kubectl apply -f db-secret.yaml
-                    kubectl apply -f db-data-pv.yaml
-                    kubectl apply -f db-data-pvc.yaml
-                    kubectl apply -f mysql-deployment.yaml
-                    kubectl apply -f mysql-service.yaml
+                    kubectl apply -f db-secret.yaml -n webapp
+                    kubectl apply -f db-data-pv.yaml -n webapp
+                    kubectl apply -f db-data-pvc.yaml -n webapp
+                    kubectl apply -f mysql-deployment.yaml -n webapp
+                    kubectl apply -f mysql-service.yaml -n webapp
                     '''
                 }
             }
@@ -62,8 +52,8 @@ pipeline {
                 script {
                     // Apply the proxy deployment and service
                     sh '''
-                    kubectl apply -f proxy-deployment.yaml
-                    kubectl apply -f proxy-service.yaml
+                    kubectl apply -f proxy-deployment.yaml -n webapp
+                    kubectl apply -f proxy-service.yaml -n webapp
                     '''
                 }
             }
@@ -73,8 +63,8 @@ pipeline {
                 script {
                     // Apply the backend deployment and service
                     sh '''
-                    kubectl apply -f backend-deployment.yaml
-                    kubectl apply -f backend-service.yaml
+                    kubectl apply -f backend-deployment.yaml -n webapp
+                    kubectl apply -f backend-service.yaml -n webapp
                     '''
                 }
             }
