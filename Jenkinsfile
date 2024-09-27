@@ -1,12 +1,5 @@
 pipeline {
-    agent {
-        kubernetes {
-            // Specify the pod template to use
-            label 'my-agent'
-            inheritFrom 'my-agent-template' // Use the pod template you configured
-            defaultContainer 'kubectl' // Specify the default container to use
-        }
-    }
+    agent { label 'built-in-node' } // Change to the label of your built-in node
     stages {
         stage('Setup Namespace') {
             steps {
