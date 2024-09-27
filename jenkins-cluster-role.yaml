@@ -1,14 +1,15 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: jenkins-cluster-role
+  name: jenkins-admin
 rules:
 - apiGroups: [""]
-  resources: ["pods", "pods/log"]
-  verbs: ["create", "get", "list", "watch", "delete"]
-- apiGroups: ["apps"]
-  resources: ["deployments"]
-  verbs: ["create", "get", "list", "update", "delete"]
-- apiGroups: [""]
-  resources: ["namespaces"]
-  verbs: ["create", "get", "list", "delete"]
+  resources: ["*"]
+  verbs: ["*"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins-admin
+  namespace: jenkins
+

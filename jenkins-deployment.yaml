@@ -1,8 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: jenkins-deployment
-  namespace: jenkins # Namespace where the Jenkins deployment will be created
+  name: jenkins
+  namespace: jenkins
 spec:
   replicas: 1
   selector:
@@ -13,15 +13,45 @@ spec:
       labels:
         app: jenkins
     spec:
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      serviceAccountName: jenkins-admin
       containers:
       - name: jenkins
         image: jenkins/jenkins:lts
-        ports:
-        - containerPort: 8080 # Jenkins runs on 8080 inside the container by default
         resources:
           limits:
-            memory: "256Mi"
-            cpu: "250m"
+            memory: "2Gi"
+            cpu: "1000m"
           requests:
-            memory: "128Mi"
-            cpu: "125m"
+            memory: "500Mi"
+            cpu: "500m"
+        ports:
+        - name: httpport
+          containerPort: 8080
+        - name: jnlpport
+          containerPort: 50000
+        livenessProbe:
+          httpGet:
+            path: "/login"
+            port: 8080
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: "/login"
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+        - name: jenkins-data
+          mountPath: /var/jenkins_home
+      volumes:
+      - name: jenkins-data
+        persistentVolumeClaim:
+          claimName: jenkins-pv-claim
