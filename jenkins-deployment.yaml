@@ -19,8 +19,8 @@ spec:
       serviceAccountName: jenkins-admin
       containers:
       - name: jenkins
-        image: custom-jenkins:latest
-        pullPolicy: IfNotPresent
+        image: custom-jenkins:latest # Use the local image name
+        imagePullPolicy: Never # Prevent pulling the image from a registry
         resources:
           limits:
             memory: "2Gi"
@@ -52,12 +52,7 @@ spec:
         volumeMounts:
         - name: jenkins-data
           mountPath: /var/jenkins_home
-        - name: kubeconfig
-          mountPath: /root/.kube
       volumes:
       - name: jenkins-data
         persistentVolumeClaim:
           claimName: jenkins-pv-claim
-      - name: kubeconfig
-        hostPath:
-          path: ~/.kube/config

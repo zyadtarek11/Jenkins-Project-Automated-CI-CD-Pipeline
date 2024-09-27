@@ -1,5 +1,22 @@
 pipeline {
-    agent any 
+    agent {
+        kubernetes {
+            yaml """
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              labels:
+                some-label: my-label
+            spec:
+              containers:
+              - name: kubectl
+                image: bitnami/kubectl:latest
+                command:
+                - cat
+                tty: true
+            """
+        }
+    } 
     stages {
         stage('Checkout') {
             steps {
