@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-service
+  namespace: jenkins # Namespace where the Jenkins service will be created
+spec:
+  selector:
+    app: jenkins
+  ports:
+  - protocol: TCP
+    port: 8081 # External port (accessible outside the cluster)
+    targetPort: 8080 # Port inside the container
+  type: NodePort
