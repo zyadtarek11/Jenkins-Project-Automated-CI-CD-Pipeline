@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'built-in-node' } // Change to the label of your built-in node
+    agent { label 'Built-In-Node' } // Change to the label of your built-in node
     stages {
         stage('Setup Namespace') {
             steps {
