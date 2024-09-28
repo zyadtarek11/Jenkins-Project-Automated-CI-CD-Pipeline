@@ -10,7 +10,7 @@ pipeline {
             steps {
                 script {
                     // Use kubeconfig credentials to authenticate with Kubernetes
-                    withCredentials([file(credentialsId: 'k8sconfig', variable: 'KUBECONFIG')]) {
+                    withCredentials([kubeconfig(credentialsId: 'k8sconfig')]) {
                         // Create the webapp namespace if it doesn't exist
                         sh "kubectl create namespace ${NAMESPACE} || echo 'Namespace ${NAMESPACE} already exists.'"
                     }
@@ -56,7 +56,7 @@ pipeline {
         stage('Deploy Database') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: 'k8sconfig', variable: 'KUBECONFIG')]) {
+                    withCredentials([kubeconfig(credentialsId: 'k8sconfig')]) {
                         // Apply the database PVC and secret
                         sh '''
                         kubectl apply -f db-secret.yaml -n ${NAMESPACE}
@@ -72,7 +72,7 @@ pipeline {
         stage('Deploy Proxy') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: 'k8sconfig', variable: 'KUBECONFIG')]) {
+                    withCredentials([kubeconfig(credentialsId: 'k8sconfig')]) {
                         // Apply the proxy deployment and service
                         sh '''
                         kubectl apply -f proxy-deployment.yaml -n ${NAMESPACE}
@@ -85,7 +85,7 @@ pipeline {
         stage('Deploy Backend') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: 'k8sconfig', variable: 'KUBECONFIG')]) {
+                    withCredentials([kubeconfig(credentialsId: 'k8sconfig')]) {
                         // Apply the backend deployment and service
                         sh '''
                         kubectl apply -f backend-deployment.yaml -n ${NAMESPACE}
