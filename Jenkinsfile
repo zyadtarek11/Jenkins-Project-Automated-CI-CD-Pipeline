@@ -9,52 +9,14 @@ pipeline {
         stage('Setup Namespace') {
             steps {
                 script {
-                    // Write kubeconfig content to a temporary file
-                    writeFile file: 'kubeconfig', text: '''apiVersion: v1
-clusters:
-- cluster:
-    certificate-authority: /home/zyad/.minikube/ca.crt
-    extensions:
-    - extension:
-        last-update: Fri, 27 Sep 2024 15:59:30 EEST
-        provider: minikube.sigs.k8s.io
-        version: v1.34.0
-      name: cluster_info
-    server: https://192.168.49.2:8443
-  name: minikube
-contexts:
-- context:
-    cluster: minikube
-    extensions:
-    - extension:
-        last-update: Fri, 27 Sep 2024 15:59:30 EEST
-        provider: minikube.sigs.k8s.io
-        version: v1.34.0
-      name: context_info
-    namespace: jenkins
-    user: minikube
-  name: minikube
-current-context: minikube
-kind: Config
-preferences: {}
-users:
-- name: minikube
-  user:
-    client-certificate: /home/zyad/.minikube/profiles/minikube/client.crt
-    client-key: /home/zyad/.minikube/profiles/minikube/client.key
-                    '''
-
-                    // Use this temporary kubeconfig file for kubectl commands
-                    withEnv(["KUBECONFIG=kubeconfig"]) {
-                        // Create namespace if it doesn't exist
-                        sh "kubectl create namespace ${NAMESPACE} || echo 'Namespace ${NAMESPACE} already exists.'"
-                    }
+                    // Create the webapp namespace if it doesn't exist
+                    sh "kubectl create namespace ${NAMESPACE} || echo 'Namespace ${NAMESPACE} already exists.'"
                 }
             }
         }
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                // Checkout the repository
+                // Checkout the repository from the specified URL
                 git branch: 'main', url: "${REPO_URL}"
             }
         }
@@ -62,9 +24,11 @@ users:
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        // Build and push the Docker image for backend
+                        // Login to Docker Registry
                         sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
-                        sh 'docker build -t backend .'
+
+                        // Build and push the backend Docker image from the root directory
+                        sh 'docker build -t backend -f Dockerfile .'
                         sh "docker tag backend ${DOCKER_REGISTRY}/backend"
                         sh "docker push ${DOCKER_REGISTRY}/backend"
                     }
@@ -75,11 +39,13 @@ users:
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        // Build and push the Docker image for nginx (proxy)
+                        // Login to Docker Registry (if necessary, skip if already logged in)
                         sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
-                        sh 'docker build -t proxy .'
-                        sh "docker tag proxy ${DOCKER_REGISTRY}/proxy"
-                        sh "docker push ${DOCKER_REGISTRY}/proxy"
+
+                        // Build and push the Nginx Docker image from the root directory
+                        sh 'docker build -t nginx -f Dockerfile.nginx .'
+                        sh "docker tag nginx ${DOCKER_REGISTRY}/nginx"
+                        sh "docker push ${DOCKER_REGISTRY}/nginx"
                     }
                 }
             }
@@ -87,42 +53,36 @@ users:
         stage('Deploy Database') {
             steps {
                 script {
-                    // Use the kubeconfig file to deploy the database resources
-                    withEnv(["KUBECONFIG=kubeconfig"]) {
-                        sh '''
-                        kubectl apply -f db-secret.yaml -n ${NAMESPACE}
-                        kubectl apply -f db-data-pv.yaml -n ${NAMESPACE}
-                        kubectl apply -f db-data-pvc.yaml -n ${NAMESPACE}
-                        kubectl apply -f mysql-deployment.yaml -n ${NAMESPACE}
-                        kubectl apply -f mysql-service.yaml -n ${NAMESPACE}
-                        '''
-                    }
-                }
-            }
-        }
-        stage('Deploy Backend') {
-            steps {
-                script {
-                    // Use the kubeconfig file to deploy the backend resources
-                    withEnv(["KUBECONFIG=kubeconfig"]) {
-                        sh '''
-                        kubectl apply -f backend-deployment.yaml -n ${NAMESPACE}
-                        kubectl apply -f backend-service.yaml -n ${NAMESPACE}
-                        '''
-                    }
+                    // Apply the database PVC and secret
+                    sh '''
+                    kubectl apply -f db-secret.yaml -n ${NAMESPACE}
+                    kubectl apply -f db-data-pv.yaml -n ${NAMESPACE}
+                    kubectl apply -f db-data-pvc.yaml -n ${NAMESPACE}
+                    kubectl apply -f mysql-deployment.yaml -n ${NAMESPACE}
+                    kubectl apply -f mysql-service.yaml -n ${NAMESPACE}
+                    '''
                 }
             }
         }
         stage('Deploy Proxy') {
             steps {
                 script {
-                    // Use the kubeconfig file to deploy the proxy (nginx) resources
-                    withEnv(["KUBECONFIG=kubeconfig"]) {
-                        sh '''
-                        kubectl apply -f proxy-deployment.yaml -n ${NAMESPACE}
-                        kubectl apply -f proxy-service.yaml -n ${NAMESPACE}
-                        '''
-                    }
+                    // Apply the proxy deployment and service
+                    sh '''
+                    kubectl apply -f proxy-deployment.yaml -n ${NAMESPACE}
+                    kubectl apply -f proxy-service.yaml -n ${NAMESPACE}
+                    '''
+                }
+            }
+        }
+        stage('Deploy Backend') {
+            steps {
+                script {
+                    // Apply the backend deployment and service
+                    sh '''
+                    kubectl apply -f backend-deployment.yaml -n ${NAMESPACE}
+                    kubectl apply -f backend-service.yaml -n ${NAMESPACE}
+                    '''
                 }
             }
         }
