@@ -4,6 +4,9 @@ pipeline {
         NAMESPACE = 'webapp'
         REPO_URL = 'https://github.com/zyadtarek11/kuberentes_three_tier.git'
         DOCKER_REGISTRY = 'zyadtarek'
+        registryCredential = 'dockerhub-credentials' // Your Jenkins credentials ID
+        backendImage = ''
+        nginxImage = ''
     }
     stages {
         stage('Setup Namespace') {
@@ -23,14 +26,10 @@ pipeline {
         stage('Build and Push Backend Image') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        // Login to Docker Registry
-                        sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
-
-                        // Build and push the backend Docker image from the root directory
-                        sh 'docker build -t backend -f Dockerfile .'
-                        sh "docker tag backend ${DOCKER_REGISTRY}/backend"
-                        sh "docker push ${DOCKER_REGISTRY}/backend"
+                    // Build and push the backend Docker image
+                    docker.withRegistry('', registryCredential) {
+                        backendImage = docker.build("${DOCKER_REGISTRY}/backend:${env.BUILD_NUMBER}", "-f Dockerfile .")
+                        backendImage.push()
                     }
                 }
             }
@@ -38,14 +37,10 @@ pipeline {
         stage('Build and Push Nginx Image') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        // Login to Docker Registry (if necessary, skip if already logged in)
-                        sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
-
-                        // Build and push the Nginx Docker image from the root directory
-                        sh 'docker build -t nginx -f Dockerfile.nginx .'
-                        sh "docker tag nginx ${DOCKER_REGISTRY}/nginx"
-                        sh "docker push ${DOCKER_REGISTRY}/nginx"
+                    // Build and push the Nginx Docker image
+                    docker.withRegistry('', registryCredential) {
+                        nginxImage = docker.build("${DOCKER_REGISTRY}/nginx:${env.BUILD_NUMBER}", "-f Dockerfile.nginx .")
+                        nginxImage.push()
                     }
                 }
             }
