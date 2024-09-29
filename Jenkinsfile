@@ -28,8 +28,8 @@ pipeline {
                     sh """
                     docker build -t ${DOCKER_REGISTRY}/backend:${env.BUILD_NUMBER} -f Dockerfile .
                     """
-                    // Use the withRegistry block to authenticate and push the image
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                    // Push the backend image after building it
+                    withDockerRegistry([ credentialsId: "dockerhub-credentials", url: "" ]) {
                         sh "docker push ${DOCKER_REGISTRY}/backend:${env.BUILD_NUMBER}"
                     }
                 }
@@ -42,8 +42,8 @@ pipeline {
                     sh """
                     docker build -t ${DOCKER_REGISTRY}/nginx:${env.BUILD_NUMBER} -f Dockerfile.nginx .
                     """
-                    // Use the withRegistry block to authenticate and push the image
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                    // Push the Nginx image after building it
+                    withDockerRegistry([ credentialsId: "dockerhub-credentials", url: "" ]) {
                         sh "docker push ${DOCKER_REGISTRY}/nginx:${env.BUILD_NUMBER}"
                     }
                 }
