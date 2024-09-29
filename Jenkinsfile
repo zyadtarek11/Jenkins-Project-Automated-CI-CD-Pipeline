@@ -4,8 +4,6 @@ pipeline {
         NAMESPACE = 'webapp'
         REPO_URL = 'https://github.com/zyadtarek11/kuberentes_three_tier.git'
         DOCKER_REGISTRY = 'zyadtarek'  // Assuming this is your Docker Hub username
-        IMAGE_NAME_BACKEND = "${DOCKER_REGISTRY}/backend"
-        IMAGE_NAME_NGINX = "${DOCKER_REGISTRY}/nginx"
         registryCredential = 'dockerhub-credentials' // Your Jenkins credentials ID
     }
     stages {
@@ -27,9 +25,12 @@ pipeline {
             steps {
                 script {
                     // Build and push the backend Docker image
-                    docker.build("${IMAGE_NAME_BACKEND}:${env.BUILD_NUMBER}", "-f Dockerfile .").withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                        docker.image("${IMAGE_NAME_BACKEND}:${env.BUILD_NUMBER}").push()
-                        docker.image("${IMAGE_NAME_BACKEND}:${env.BUILD_NUMBER}").push("latest")
+                    sh """
+                    docker build -t ${DOCKER_REGISTRY}/backend:latest -f Dockerfile .
+                    """
+                    // Use the withRegistry block to push the image
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                        sh "docker push ${DOCKER_REGISTRY}/backend:latest"
                     }
                 }
             }
@@ -38,9 +39,12 @@ pipeline {
             steps {
                 script {
                     // Build and push the Nginx Docker image
-                    docker.build("${IMAGE_NAME_NGINX}:${env.BUILD_NUMBER}", "-f Dockerfile.nginx .").withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                        docker.image("${IMAGE_NAME_NGINX}:${env.BUILD_NUMBER}").push()
-                        docker.image("${IMAGE_NAME_NGINX}:${env.BUILD_NUMBER}").push("latest")
+                    sh """
+                    docker build -t ${DOCKER_REGISTRY}/nginx:latest -f Dockerfile.nginx .
+                    """
+                    // Use the withRegistry block to push the image
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                        sh "docker push ${DOCKER_REGISTRY}/nginx:latest"
                     }
                 }
             }
