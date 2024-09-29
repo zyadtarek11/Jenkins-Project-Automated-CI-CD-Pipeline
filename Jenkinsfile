@@ -27,11 +27,10 @@ pipeline {
             steps {
                 script {
                     // Build and push the backend Docker image
-                    sh """
-                    docker build -t ${IMAGE_NAME_BACKEND}:${env.BUILD_NUMBER} -f Dockerfile .
-                    echo ${env.DOCKER_PASS} | docker login -u ${env.DOCKER_USER} --password-stdin
-                    docker push ${IMAGE_NAME_BACKEND}:${env.BUILD_NUMBER}
-                    """
+                    docker.build("${IMAGE_NAME_BACKEND}:${env.BUILD_NUMBER}", "-f Dockerfile .").withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                        docker.image("${IMAGE_NAME_BACKEND}:${env.BUILD_NUMBER}").push()
+                        docker.image("${IMAGE_NAME_BACKEND}:${env.BUILD_NUMBER}").push("latest")
+                    }
                 }
             }
         }
@@ -39,11 +38,10 @@ pipeline {
             steps {
                 script {
                     // Build and push the Nginx Docker image
-                    sh """
-                    docker build -t ${IMAGE_NAME_NGINX}:${env.BUILD_NUMBER} -f Dockerfile.nginx .
-                    echo ${env.DOCKER_PASS} | docker login -u ${env.DOCKER_USER} --password-stdin
-                    docker push ${IMAGE_NAME_NGINX}:${env.BUILD_NUMBER}
-                    """
+                    docker.build("${IMAGE_NAME_NGINX}:${env.BUILD_NUMBER}", "-f Dockerfile.nginx .").withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                        docker.image("${IMAGE_NAME_NGINX}:${env.BUILD_NUMBER}").push()
+                        docker.image("${IMAGE_NAME_NGINX}:${env.BUILD_NUMBER}").push("latest")
+                    }
                 }
             }
         }
