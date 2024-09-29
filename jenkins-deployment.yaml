@@ -21,6 +21,8 @@ spec:
       - name: jenkins
         image: custom-jenkins:latest # Use the local image name
         imagePullPolicy: Never # Prevent pulling the image from a registry
+        securityContext:
+          runAsUser: 0
         resources:
           limits:
             memory: "2Gi"
@@ -61,4 +63,4 @@ spec:
       - name: docker-sock
         hostPath:
           path: /var/run/docker.sock # Mount the Docker socket from the host
-          type: Socket # Ensure this is specified as a socket type
+          type: Socket # Ensure this is set to Socket specified as a socket type

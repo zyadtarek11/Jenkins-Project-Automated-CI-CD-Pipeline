@@ -26,11 +26,11 @@ pipeline {
         stage('Build and Push Backend Image') {
             steps {
                 script {
-                    // Build and push the backend Podman image
+                    // Build and push the backend Docker image
                     sh """
-                    podman build -t ${DOCKER_REGISTRY}/backend:${env.BUILD_NUMBER} -f Dockerfile .
-                    podman login -u ${env.DOCKER_USER} -p ${env.DOCKER_PASS} ${DOCKER_REGISTRY}
-                    podman push ${DOCKER_REGISTRY}/backend:${env.BUILD_NUMBER}
+                    docker build -t ${DOCKER_REGISTRY}/backend:${env.BUILD_NUMBER} -f Dockerfile .
+                    docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_PASS} ${DOCKER_REGISTRY}
+                    docker push ${DOCKER_REGISTRY}/backend:${env.BUILD_NUMBER}
                     """
                 }
             }
@@ -38,11 +38,11 @@ pipeline {
         stage('Build and Push Nginx Image') {
             steps {
                 script {
-                    // Build and push the Nginx Podman image
+                    // Build and push the Nginx Docker image
                     sh """
-                    podman build -t ${DOCKER_REGISTRY}/nginx:${env.BUILD_NUMBER} -f Dockerfile.nginx .
-                    podman login -u ${env.DOCKER_USER} -p ${env.DOCKER_PASS} ${DOCKER_REGISTRY}
-                    podman push ${DOCKER_REGISTRY}/nginx:${env.BUILD_NUMBER}
+                    docker build -t ${DOCKER_REGISTRY}/nginx:${env.BUILD_NUMBER} -f Dockerfile.nginx .
+                    docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_PASS} ${DOCKER_REGISTRY}
+                    docker push ${DOCKER_REGISTRY}/nginx:${env.BUILD_NUMBER}
                     """
                 }
             }
