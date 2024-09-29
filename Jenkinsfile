@@ -1,43 +1,5 @@
 pipeline {
-    agent {
-        kubernetes {
-            label 'my-agent'
-            defaultContainer 'jnlp'
-            yaml """
-            apiVersion: v1
-            kind: Pod
-            metadata:
-              name: jenkins-agent
-            spec:
-              serviceAccountName: jenkins-admin
-              containers:
-              - name: jnlp
-                image: jenkins/inbound-agent
-              - name: docker
-                image: docker:20.10.7
-                command:
-                - cat
-                tty: true
-                volumeMounts:
-                - name: docker-socket
-                  mountPath: /var/run/docker.sock
-              - name: kubectl
-                image: kumargaurav522/jnlp-kubectl-slave:latest
-                command:
-                - cat
-                tty: true
-              - name: git
-                image: bitnami/git:latest
-                command:
-                - cat
-                tty: true
-              volumes:
-              - name: docker-socket
-                hostPath:
-                  path: /var/run/docker.sock
-            """
-        }
-    }
+    agent any
     environment {
         NAMESPACE = 'webapp'
         REPO_URL = 'https://github.com/zyadtarek11/kuberentes_three_tier.git'
@@ -64,22 +26,24 @@ pipeline {
         stage('Build and Push Backend Image') {
             steps {
                 script {
-                    // Build and push the backend Docker image
-                    docker.withRegistry('', registryCredential) {
-                        backendImage = docker.build("${DOCKER_REGISTRY}/backend:${env.BUILD_NUMBER}", "-f Dockerfile .")
-                        backendImage.push()
-                    }
+                    // Build and push the backend Podman image
+                    sh """
+                    podman build -t ${DOCKER_REGISTRY}/backend:${env.BUILD_NUMBER} -f Dockerfile .
+                    podman login -u ${env.DOCKER_USER} -p ${env.DOCKER_PASS} ${DOCKER_REGISTRY}
+                    podman push ${DOCKER_REGISTRY}/backend:${env.BUILD_NUMBER}
+                    """
                 }
             }
         }
         stage('Build and Push Nginx Image') {
             steps {
                 script {
-                    // Build and push the Nginx Docker image
-                    docker.withRegistry('', registryCredential) {
-                        nginxImage = docker.build("${DOCKER_REGISTRY}/nginx:${env.BUILD_NUMBER}", "-f Dockerfile.nginx .")
-                        nginxImage.push()
-                    }
+                    // Build and push the Nginx Podman image
+                    sh """
+                    podman build -t ${DOCKER_REGISTRY}/nginx:${env.BUILD_NUMBER} -f Dockerfile.nginx .
+                    podman login -u ${env.DOCKER_USER} -p ${env.DOCKER_PASS} ${DOCKER_REGISTRY}
+                    podman push ${DOCKER_REGISTRY}/nginx:${env.BUILD_NUMBER}
+                    """
                 }
             }
         }
