@@ -21,8 +21,6 @@ spec:
       - name: jenkins
         image: custom-jenkins:latest # Use the local image name
         imagePullPolicy: Never # Prevent pulling the image from a registry
-        securityContext:
-          runAsUser: 0
         resources:
           limits:
             memory: "2Gi"

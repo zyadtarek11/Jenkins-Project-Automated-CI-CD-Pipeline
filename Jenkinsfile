@@ -3,10 +3,10 @@ pipeline {
     environment {
         NAMESPACE = 'webapp'
         REPO_URL = 'https://github.com/zyadtarek11/kuberentes_three_tier.git'
-        DOCKER_REGISTRY = 'zyadtarek'
+        DOCKER_REGISTRY = 'zyadtarek'  // Assuming this is your Docker Hub username
+        IMAGE_NAME_BACKEND = "${DOCKER_REGISTRY}/backend"
+        IMAGE_NAME_NGINX = "${DOCKER_REGISTRY}/nginx"
         registryCredential = 'dockerhub-credentials' // Your Jenkins credentials ID
-        backendImage = ''
-        nginxImage = ''
     }
     stages {
         stage('Setup Namespace') {
@@ -28,9 +28,9 @@ pipeline {
                 script {
                     // Build and push the backend Docker image
                     sh """
-                    docker build -t ${DOCKER_REGISTRY}/backend:${env.BUILD_NUMBER} -f Dockerfile .
-                    docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_PASS} ${DOCKER_REGISTRY}
-                    docker push ${DOCKER_REGISTRY}/backend:${env.BUILD_NUMBER}
+                    docker build -t ${IMAGE_NAME_BACKEND}:${env.BUILD_NUMBER} -f Dockerfile .
+                    echo ${env.DOCKER_PASS} | docker login -u ${env.DOCKER_USER} --password-stdin
+                    docker push ${IMAGE_NAME_BACKEND}:${env.BUILD_NUMBER}
                     """
                 }
             }
@@ -40,9 +40,9 @@ pipeline {
                 script {
                     // Build and push the Nginx Docker image
                     sh """
-                    docker build -t ${DOCKER_REGISTRY}/nginx:${env.BUILD_NUMBER} -f Dockerfile.nginx .
-                    docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_PASS} ${DOCKER_REGISTRY}
-                    docker push ${DOCKER_REGISTRY}/nginx:${env.BUILD_NUMBER}
+                    docker build -t ${IMAGE_NAME_NGINX}:${env.BUILD_NUMBER} -f Dockerfile.nginx .
+                    echo ${env.DOCKER_PASS} | docker login -u ${env.DOCKER_USER} --password-stdin
+                    docker push ${IMAGE_NAME_NGINX}:${env.BUILD_NUMBER}
                     """
                 }
             }
