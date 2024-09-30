@@ -20,6 +20,9 @@ RUN apt-get update -qq \
 # Add the 'jenkins' user to the 'docker' group to allow Jenkins to run Docker commands
 RUN usermod -aG docker jenkins
 
+# Ensure the Docker socket belongs to the 'docker' group
+RUN chown root:docker /var/run/docker.sock
+
 # Clean up
 RUN apt-get clean
 
@@ -30,7 +33,5 @@ RUN apt-get update && \
 RUN curl -LO "https://dl.k8s.io/release/v1.27.0/bin/linux/amd64/kubectl" && \
     chmod +x ./kubectl && \
     mv ./kubectl /usr/local/bin/kubectl
-
-
 
 USER jenkins
