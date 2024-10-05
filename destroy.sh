@@ -9,8 +9,8 @@ kubectl delete -f jenkins-deployment.yaml -n jenkins
 kubectl delete -f jenkins-service-account.yaml -n jenkins
 kubectl delete -f jenkins-cluster-role.yaml -n jenkins
 kubectl delete -f jenkins-cluster-role-binding.yaml -n jenkins
-kubectl delete -f jenkins-role.yaml -n jenkins
-kubectl delete -f jenkins-role-binding.yaml -n jenkins
+kubectl delete -f jenkins-role.yaml 
+kubectl delete -f jenkins-role-binding.yaml 
 kubectl delete -f jenkins-pv.yaml -n jenkins
 
 # Delete the Jenkins namespace
