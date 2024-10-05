@@ -52,4 +52,10 @@ Before starting, make sure you have the following:
 
 - Ensure you have the correct DockerHub credentials set in Jenkins.
 - You can modify the `dockerhub-credentials` ID in the Jenkinsfile if needed.
+- Make sure to make the scripts executable by running the following command:
+
+   ```bash
+   chmod +x start.sh destroy.sh
+   ```
+
 - Enjoy a smooth CI/CD pipeline setup for your project!

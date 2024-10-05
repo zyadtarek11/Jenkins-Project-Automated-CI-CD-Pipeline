@@ -13,21 +13,11 @@ spec:
       labels:
         app: jenkins
     spec:
-      securityContext:
-        fsGroup: 1000
-        runAsUser: 1000
       serviceAccountName: jenkins-admin
-      initContainers: # Add initContainer here
-      - name: init-fix-docker-sock
-        image: busybox:latest # Lightweight image for the init container
-        command: ["sh", "-c", "chown 1000:docker /var/run/docker.sock"]
-        volumeMounts:
-        - name: docker-sock
-          mountPath: /var/run/docker.sock
       containers:
       - name: jenkins
-        image: custom-jenkins:latest # Use the local image name
-        imagePullPolicy: Never # Prevent pulling the image from a registry
+        image: custom-jenkins:latest
+        imagePullPolicy: Never
         resources:
           limits:
             memory: "2Gi"
@@ -60,12 +50,13 @@ spec:
         - name: jenkins-data
           mountPath: /var/jenkins_home
         - name: docker-sock
-          mountPath: /var/run/docker.sock # Mount Docker socket
+          mountPath: /var/run/docker.sock
       volumes:
       - name: jenkins-data
         persistentVolumeClaim:
           claimName: jenkins-pv-claim
       - name: docker-sock
         hostPath:
-          path: /var/run/docker.sock # Mount the Docker socket from the host
-          type: Socket # Ensure this is set to Socket specified as a socket type
+          path: /var/run/docker.sock
+          type: Socket
+
