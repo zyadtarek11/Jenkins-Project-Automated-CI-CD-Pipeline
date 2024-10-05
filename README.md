@@ -48,6 +48,10 @@ Before starting, make sure you have the following:
 3. Create the pipeline in Jenkins and point it to this repository.
 4. Monitor the pipeline as it builds, pushes images, and deploys your application.
 
+## Accessing Jenkins
+
+You can access Jenkins at the following URL: `http://192.168.49.2:32000/`
+
 ### Key Points to Consider
 
 - Ensure you have the correct DockerHub credentials set in Jenkins.
