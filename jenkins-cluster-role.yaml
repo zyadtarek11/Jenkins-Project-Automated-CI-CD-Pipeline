@@ -6,10 +6,4 @@ rules:
 - apiGroups: [""]
   resources: ["*"]
   verbs: ["*"]
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: jenkins-admin
-  namespace: jenkins
 

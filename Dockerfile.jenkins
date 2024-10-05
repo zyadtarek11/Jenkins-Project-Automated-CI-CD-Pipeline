@@ -20,9 +20,6 @@ RUN apt-get update -qq \
 # Add the 'jenkins' user to the 'docker' group to allow Jenkins to run Docker commands
 RUN usermod -aG docker jenkins
 
-# Ensure the Docker socket belongs to the 'docker' group
-RUN chown root:docker /var/run/docker.sock
-
 # Clean up
 RUN apt-get clean
 

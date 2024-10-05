@@ -17,6 +17,13 @@ spec:
         fsGroup: 1000
         runAsUser: 1000
       serviceAccountName: jenkins-admin
+      initContainers: # Add initContainer here
+      - name: init-fix-docker-sock
+        image: busybox:latest # Lightweight image for the init container
+        command: ["sh", "-c", "chown 1000:docker /var/run/docker.sock"]
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
       containers:
       - name: jenkins
         image: custom-jenkins:latest # Use the local image name
