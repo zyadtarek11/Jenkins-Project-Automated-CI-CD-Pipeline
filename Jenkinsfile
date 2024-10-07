@@ -26,7 +26,7 @@ pipeline {
                 script {
                     // Build the backend Docker image with the Jenkins build number as the tag
                     sh """
-                    docker build -t ${DOCKER_REGISTRY}/backend:${env.BUILD_NUMBER} -f Dockerfile.backend ./backend
+                    docker build -t ${DOCKER_REGISTRY}/backend:${env.BUILD_NUMBER} -f ./backend/Dockerfile.backend ./backend
                     """
                     // Push the backend image after building it
                     withDockerRegistry([ credentialsId: "dockerhub-credentials", url: "" ]) {
@@ -40,7 +40,7 @@ pipeline {
                 script {
                     // Build the Nginx Docker image with the Jenkins build number as the tag
                     sh """
-                    docker build -t ${DOCKER_REGISTRY}/nginx:${env.BUILD_NUMBER} -f Dockerfile.nginx ./proxy
+                    docker build -t ${DOCKER_REGISTRY}/nginx:${env.BUILD_NUMBER} -f ./proxy/Dockerfile.nginx ./proxy
                     """
                     // Push the Nginx image after building it
                     withDockerRegistry([ credentialsId: "dockerhub-credentials", url: "" ]) {
