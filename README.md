@@ -3,7 +3,8 @@
 ![Untitled Diagram drawio](https://github.com/user-attachments/assets/502d6c59-c110-49cf-98d6-4e41302f4905)
 
 This project sets up a fully automated Jenkins pipeline for Continuous Integration and Continuous Deployment (CI/CD). Jenkins will clone the repository containing Dockerfiles and deployment files, build the Docker images, push them to DockerHub, and deploy the application. The pipeline also configures a reverse proxy, backend, and connects to a database, ensuring seamless integration and deployment.
-for more details on the application project you can access the repo through this link : `https://github.com/zyadtarek11/kuberentes-three-tier-project`
+for more details on the application project you can access the repo through this link : 
+`https://github.com/zyadtarek11/kuberentes-three-tier-project`
 
 ## Features
 
