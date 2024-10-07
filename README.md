@@ -1,6 +1,6 @@
 # Jenkins-Project: Automated CI/CD Pipeline
 
-![Jenkins Project Illustration](/Jenkins-project-illustration.svg)
+![Jenkins Project Illustration](Jenkins-project-illustration.svg)
 
 This project sets up a fully automated Jenkins pipeline for Continuous Integration and Continuous Deployment (CI/CD). Jenkins will clone a repository containing Dockerfiles and deployment files, build the Docker images, push them to DockerHub, and deploy the application. The pipeline also configures a reverse proxy, backend, and connects to a database, ensuring seamless integration and deployment.
 
