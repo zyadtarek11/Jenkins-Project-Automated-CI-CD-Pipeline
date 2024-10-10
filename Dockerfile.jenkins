@@ -20,6 +20,16 @@ RUN apt-get update -qq \
 # Add the 'jenkins' user to the 'docker' group to allow Jenkins to run Docker commands
 RUN usermod -aG docker jenkins
 
+# Set the root password to "admin"
+RUN echo "root:admin" | chpasswd
+
+# Create the script that will switch to root and change ownership of Docker socket
+RUN echo '#!/bin/bash\n\
+echo "admin" | su -c "chown root:docker /var/run/docker.sock" root' > /usr/local/bin/change_docker_sock.sh
+
+# Make the script executable
+RUN chmod +x /usr/local/bin/change_docker_sock.sh
+
 # Clean up
 RUN apt-get clean
 

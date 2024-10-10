@@ -16,12 +16,11 @@ spec:
       securityContext:
         runAsGroup: 1000
         runAsUser: 1000
-        fsGroup: 999
       serviceAccountName: jenkins-admin
       containers:
       - name: jenkins
         image: custom-jenkins:latest
-        imagePullPolicy: Never
+        imagePullPolicy: IfNotPresent
         resources:
           limits:
             memory: "2Gi"
@@ -32,13 +31,15 @@ spec:
         ports:
         - name: httpport
           containerPort: 8080
-        - name: jnlpport
-          containerPort: 50000
         volumeMounts:
         - name: jenkins-data
           mountPath: /var/jenkins_home
         - name: docker-sock
           mountPath: /var/run/docker.sock
+        command:
+        - sh
+        - -c
+        - "/usr/local/bin/change_docker_sock.sh && exec /usr/bin/tini -- /usr/local/bin/jenkins.sh"
       volumes:
       - name: jenkins-data
         persistentVolumeClaim:
