@@ -16,6 +16,7 @@ spec:
       securityContext:
         runAsGroup: 1000
         runAsUser: 1000
+        fsGroup: 999
       serviceAccountName: jenkins-admin
       containers:
       - name: jenkins
