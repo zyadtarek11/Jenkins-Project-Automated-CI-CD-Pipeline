@@ -20,7 +20,7 @@ Before starting, make sure you have the following:
 - **Jenkins** installed and running.
 - **Docker** installed on the Jenkins machine.
 - **DockerHub account** with repository access.
-- **Kubernetes cluster** to deploy the application.
+- **Kubernetes cluster** to deploy the application. You can use minikube for local testing and EKS for cloud Env.
 
 ## Pipeline Setup
 
